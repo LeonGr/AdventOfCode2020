@@ -56,9 +56,7 @@ fn part2(lines: &Vec<String>) {
         tree_amounts.push(trees);
     }
 
-    let multiplied = tree_amounts
-        .into_iter()
-        .fold(1, |acc, x| acc * x);
+    let multiplied: i32 = tree_amounts.iter().product();
 
     println!("Multiplied: {}", multiplied);
 }
