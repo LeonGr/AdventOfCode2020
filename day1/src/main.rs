@@ -3,16 +3,19 @@ use std::fs;
 use std::io::BufReader;
 use std::io::BufRead;
 
-fn read_file() -> io::Result<Vec<i32>> {
-    // ? returns an error if 'open' fails
+fn read_lines_to_int() -> io::Result<Vec<i32>> {
     let input_file = fs::File::open("input")?;
     let file_reader = BufReader::new(input_file);
 
-    Ok(file_reader.lines().filter_map(io::Result::ok).map(|string| string.parse::<i32>().unwrap()).collect())
+    Ok(file_reader
+       .lines()
+       .filter_map(io::Result::ok)
+       .map(|string| string.parse::<i32>().unwrap())
+       .collect())
 }
 
 fn main() -> io::Result<()> {
-    let mut input = read_file()?;
+    let mut input = read_lines_to_int()?;
 
     for i in (0..input.len()).rev() {
         for j in 0..input.len() {
