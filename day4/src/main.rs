@@ -73,35 +73,18 @@ fn check_passport(fields: HashMap<String, String>) -> bool {
         return false;
     }
 
-    let hair_color: String = match fields.get("hcl") {
-        Some(hair_color) => hair_color.clone(),
+    match fields.get("hcl") {
+        Some(hcl) if Regex::new(r"^#[0-9a-f]{6}$").unwrap().is_match(hcl) => (),
         _ => return false
     };
 
-    let hair_color_re = Regex::new(r"^#[0-9a-f]{6}$").unwrap();
-    match hair_color_re.find(&hair_color[..]) {
-        Some(hc) => hc.as_str(),
+    match fields.get("ecl") {
+        Some(ecl) if Regex::new(r"^amb|blu|brn|gry|grn|hzl|oth$").unwrap().is_match(ecl) => (),
         _ => return false
     };
 
-    let eye_color: String = match fields.get("ecl") {
-        Some(eye_color) => eye_color.clone(),
-        _ => return false
-    };
-
-    match eye_color.as_str() {
-        "amb" | "blu" | "brn" | "gry" | "grn" | "hzl" | "oth" => (),
-        _ => return false
-    }
-
-    let passport_id: String = match fields.get("pid") {
-        Some(id) => id.clone(),
-        _ => return false
-    };
-
-    let pid_re = Regex::new(r"^[0-9]{9}$").unwrap();
-    match pid_re.find(&passport_id[..]) {
-        Some(pid) => pid.as_str(),
+    match fields.get("pid") {
+        Some(pid) if Regex::new(r"^[0-9]{9}$").unwrap().is_match(pid) => (),
         _ => return false
     };
 
