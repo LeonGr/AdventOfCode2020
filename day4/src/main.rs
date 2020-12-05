@@ -56,17 +56,17 @@ fn check_passport(fields: HashMap<String, String>) -> bool {
     };
 
     let height_re = Regex::new(r"^\d*").unwrap();
-    let found_height = match height_re.find(&height[..]) {
+    let height_value = match height_re.find(&height[..]) {
         Some(hgt) => hgt.as_str(),
         _ => return false
     };
 
     if height.ends_with("cm") {
-        if !(150..=193).contains(&found_height.parse::<u8>().unwrap()) {
+        if !(150..=193).contains(&height_value.parse::<u8>().unwrap()) {
             return false;
         }
     } else if height.ends_with("in") {
-        if !(59..=76).contains(&found_height.parse::<u8>().unwrap()) {
+        if !(59..=76).contains(&height_value.parse::<u8>().unwrap()) {
             return false;
         }
     } else {
