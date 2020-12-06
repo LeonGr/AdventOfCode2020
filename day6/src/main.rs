@@ -41,25 +41,21 @@ fn part1(lines: &String) {
 fn part2(lines: &String) {
     let alphabet = ('a'..='z').collect::<HashSet<char>>();
 
-    let count = lines
+    let count: usize = lines
         .trim()
         .split("\n\n")
         .map(|group| {
             group
-                .split("\n")
+                .lines()
                 .map(|x| x.chars().collect::<HashSet<char>>())
-                .collect::<Vec<HashSet<char>>>()
-        })
-        .fold(0, |acc, group| {
-            acc + group
-                .iter()
                 .fold(alphabet.clone(), |acc, x| {
                     acc.intersection(&x)
                     .map(|c| *c)
                     .collect::<HashSet<char>>()
                 })
                 .len()
-        });
+        })
+        .sum();
 
     println!("{}", count);
 }
