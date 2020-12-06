@@ -39,34 +39,23 @@ fn part1(lines: &String) {
 }
 
 fn part2(lines: &String) {
-    let all_groups = lines
+    let alphabet = ('a'..='z').collect::<HashSet<char>>();
+
+    let count = lines
         .trim()
         .split("\n\n")
         .map(|group| {
-            let individuals = group
+            group
                 .split("\n")
-                .collect::<Vec<&str>>()
-                .iter()
-                .map(|x| HashSet::from_iter(x.chars().collect::<Vec<char>>()))
-                .collect::<Vec<HashSet<char>>>();
-            individuals
+                .map(|x| x.chars().collect::<HashSet<char>>())
+                .collect::<Vec<HashSet<char>>>()
         })
-        .collect::<Vec<Vec<HashSet<char>>>>();
-
-    let alphabet = "abcdefghijklmnopqrstuvwxyz"
-        .chars()
-        .collect::<HashSet<char>>();
-
-    let count = all_groups
-        .iter()
         .fold(0, |acc, group| {
             acc + group
                 .iter()
-                .fold(alphabet.clone(), |acc: HashSet<char>, x| {
+                .fold(alphabet.clone(), |acc, x| {
                     acc.intersection(&x)
-                    .collect::<Vec<&char>>()
-                    .iter()
-                    .map(|c| c.to_owned().to_owned())
+                    .map(|c| *c)
                     .collect::<HashSet<char>>()
                 })
                 .len()
