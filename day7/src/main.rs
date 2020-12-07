@@ -25,9 +25,7 @@ fn build_rules_map(input: &Vec<String>) -> HashMap<String, HashMap<String, u8>> 
         let mut bag_capacity: HashMap<String, u8> = HashMap::new();
 
         if !rule.starts_with("no") {
-            let capacities = rule.split(", ").collect::<Vec<&str>>();
-
-            capacities.iter().for_each(|bag_rule| {
+            rule.split(", ").for_each(|bag_rule| {
                 let amount = match amount_re.find(&bag_rule) {
                     Some(amount) => amount.as_str().parse::<u8>().unwrap(),
                     _ => panic!("No amount"),
