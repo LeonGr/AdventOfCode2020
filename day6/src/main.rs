@@ -1,17 +1,7 @@
-use std::io::BufRead;
 use std::fs::File;
 use std::io::Read;
 
 use std::collections::HashSet;
-use std::iter::FromIterator;
-
-fn read_input_lines() -> std::io::Result<Vec<String>> {
-    let input_file = std::fs::File::open("input")?;
-    let file_reader = std::io::BufReader::new(input_file);
-
-    Ok(file_reader.lines().filter_map(std::io::Result::ok).collect())
-}
-
 
 fn read_input_string() -> std::io::Result<String> {
     let mut input = String::new();
