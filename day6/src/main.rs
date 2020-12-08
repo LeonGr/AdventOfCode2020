@@ -15,10 +15,7 @@ fn part1(lines: &String) {
     let count: usize = lines
         .split("\n\n")
         .map(|group| {
-            let mut char_list: Vec<char> = group
-                    .chars()
-                    .filter(|c| c != &'\n')
-                    .collect();
+            let mut char_list: Vec<char> = group.chars().filter(|c| c != &'\n').collect();
             char_list.sort();
             char_list.dedup();
             char_list.len()
@@ -39,9 +36,7 @@ fn part2(lines: &String) {
                 .lines()
                 .map(|x| x.chars().collect::<HashSet<char>>())
                 .fold(alphabet.clone(), |acc, x| {
-                    acc.intersection(&x)
-                    .map(|c| *c)
-                    .collect::<HashSet<char>>()
+                    acc.intersection(&x).map(|c| *c).collect()
                 })
                 .len()
         })
