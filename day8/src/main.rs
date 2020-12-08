@@ -29,14 +29,15 @@ fn run_program(lines: &Vec<String>) -> Status {
         let parsed = current_line.split(" ").collect::<Vec<&str>>();
 
         let instruction = parsed[0];
-        let value = parsed[1].parse::<i32>().unwrap();
 
         match instruction {
             "nop" => (),
             "acc" => {
+                let value = parsed[1].parse::<i32>().unwrap();
                 accumulator += value;
             },
             "jmp" => {
+                let value = parsed[1].parse::<i32>().unwrap();
                 instruction_pointer = instruction_pointer.wrapping_add(value as usize);
                 continue;
             },
