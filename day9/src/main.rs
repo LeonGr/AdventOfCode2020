@@ -60,6 +60,8 @@ fn contiguous_subset_sum(input: &Vec<u64>, target: &u64) -> Option<Vec<u64>> {
             if total == *target {
                 let range = input[i..=j].to_vec();
                 return Some(range);
+            } else if total > *target {
+                break;
             }
         }
     }
