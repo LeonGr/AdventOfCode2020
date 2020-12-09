@@ -13,6 +13,7 @@ fn read_input_lines() -> std::io::Result<Vec<String>> {
 struct Status {
     final_acc: i32,
     final_ip: usize,
+    finished: bool,
 }
 
 fn run_program(lines: &Vec<String>) -> Status {
@@ -21,7 +22,9 @@ fn run_program(lines: &Vec<String>) -> Status {
 
     let mut seen = HashSet::new();
 
-    while instruction_pointer < lines.len() {
+    let mut finished = false;
+
+    while !finished {
         if seen.contains(&instruction_pointer) {
             break;
         } else {
@@ -47,12 +50,17 @@ fn run_program(lines: &Vec<String>) -> Status {
             _ => panic!("Unknown instruction"),
         }
 
-        instruction_pointer += 1
+        instruction_pointer += 1;
+
+        if instruction_pointer >= lines.len() {
+            finished = true;
+        }
     }
 
     Status {
         final_acc: accumulator,
         final_ip: instruction_pointer,
+        finished: true,
     }
 }
 
@@ -87,7 +95,7 @@ fn part2(lines: &Vec<String>) {
 
         let output = run_program(&copy);
 
-        if output.final_ip == length {
+        if output.finished {
             println!("finished, acc: {}", output.final_acc);
             break;
         }
