@@ -1,5 +1,5 @@
 use regex::Regex;
-use std::{collections::HashMap, io::BufRead};
+use std::{collections::{HashMap, HashSet}, io::BufRead};
 
 fn read_input_lines() -> std::io::Result<Vec<String>> {
     let input_file = std::fs::File::open("input")?;
@@ -11,15 +11,17 @@ fn read_input_lines() -> std::io::Result<Vec<String>> {
         .collect())
 }
 
-fn build_rules_map(input: &Vec<String>) -> HashMap<String, HashMap<String, u8>> {
+fn build_rules_map(input: &Vec<String>) -> (HashMap<String, HashMap<String, u8>>, HashMap<String, HashSet<String>>) {
     let mut bag_rules: HashMap<String, HashMap<String, u8>> = HashMap::new();
+
+    let mut bag_can_be_contained_in: HashMap<String, HashSet<String>> = HashMap::new();
 
     let amount_re = Regex::new(r"^\d+").unwrap();
     let bag_re = Regex::new(r"\w+\s\w+\sbag").unwrap();
 
     for line in input {
         let parts = line.split(" bags contain ").collect::<Vec<&str>>();
-        let bag = parts[0].to_string();
+        let container = parts[0].to_string();
         let rule = parts[1];
 
         let mut bag_capacity: HashMap<String, u8> = HashMap::new();
@@ -31,30 +33,41 @@ fn build_rules_map(input: &Vec<String>) -> HashMap<String, HashMap<String, u8>> 
                     _ => panic!("No amount"),
                 };
 
-                let bag = match bag_re.find(&bag_rule) {
+                let contained = match bag_re.find(&bag_rule) {
                     Some(bag) => bag.as_str().replace(" bag", ""),
                     _ => panic!("No bag"),
                 };
 
-                bag_capacity.insert(bag, amount);
+                let set = bag_can_be_contained_in.entry(contained.clone()).or_insert(HashSet::new());
+                set.insert(container.clone());
+
+                bag_capacity.insert(contained, amount);
             });
         }
 
-        bag_rules.insert(bag, bag_capacity);
+        bag_rules.insert(container, bag_capacity);
     }
 
-    return bag_rules;
+    return (bag_rules, bag_can_be_contained_in);
 }
 
-fn bag_can_contain_shiny_gold(bag: &String, rules: &HashMap<String, HashMap<String, u8>>) -> bool {
-    let current_bag_rules = rules.get(bag).unwrap();
+fn bag_can_contain_shiny_gold(bag: &String, rules: &HashMap<String, HashSet<String>>) -> bool {
+    let current_bag_rules = rules.get("shiny gold").unwrap();
 
-    return current_bag_rules.keys().any(|nested_bag| {
-        nested_bag == &"shiny gold".to_string() || bag_can_contain_shiny_gold(nested_bag, rules)
-    });
+    if current_bag_rules.len() == 0 {
+        return false;
+    } else if current_bag_rules.contains(bag) {
+        return true;
+    } else {
+        return current_bag_rules
+            .iter()
+            .any(|bag| {
+                bag_can_contain_shiny_gold(bag, rules)
+            })
+    }
 }
 
-fn part1(bag_rules: &HashMap<String, HashMap<String, u8>>) {
+fn part1(bag_rules: &HashMap<String, HashSet<String>>) {
     let total = bag_rules
         .keys()
         .filter(|bag| bag_can_contain_shiny_gold(bag, &bag_rules))
@@ -85,9 +98,9 @@ fn part2(bag_rules: &HashMap<String, HashMap<String, u8>>) {
 fn main() -> std::io::Result<()> {
     let lines = read_input_lines()?;
 
-    let rules = build_rules_map(&lines);
+    let (rules, can_contain_rules) = build_rules_map(&lines);
 
-    part1(&rules);
+    part1(&can_contain_rules);
     part2(&rules);
 
     Ok(())
