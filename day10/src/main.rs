@@ -28,20 +28,49 @@ fn part1(lines: &Vec<u64>) {
     println!("multiplied: {}", diff_one * diff_three);
 }
 
-fn part2(lines: &Vec<u64>, start: usize) -> u64 {
-    let mut total: u64 = 0;
-    //println!("{:?}", lines);
+fn tribonacci(n: u64) -> u64 {
+    if n == 0 || n == 1 {
+        return 0;
+    } else if n == 2 {
+        return 1;
+    } else {
+        return tribonacci(n - 1) + tribonacci(n - 2) + tribonacci(n - 3);
+    }
+}
 
-    for i in start..lines.len()-2 {
-        if lines[i] - lines[i - 1] < 3 && lines[i + 1] - lines[i - 1] <= 3 {
-            let mut copy = lines.clone();
-            copy.remove(i);
-            total += 1;
-            total += part2(&copy, i);
+fn part2(lines: &Vec<u64>) {
+    let mut total: u64 = 1;
+
+    let mut tribonaccis: Vec<u64> = vec![];
+
+    for i in 2..7 {
+        tribonaccis.push(tribonacci(i as u64));
+    }
+
+    let mut consecutive_one_diffs = 0;
+
+    for i in 1..lines.len() {
+        let diff = lines[i] - lines[i - 1];
+
+        if diff == 1 {
+            consecutive_one_diffs += 1;
+        } else {
+            let options;
+
+            if diff == 3 && consecutive_one_diffs > 0 {
+                options = tribonaccis[consecutive_one_diffs];
+            } else if consecutive_one_diffs > 0 {
+                options = tribonaccis[consecutive_one_diffs] + tribonaccis[consecutive_one_diffs-1];
+            } else {
+                options = 1;
+            }
+
+            total *= options;
+            consecutive_one_diffs = 0;
         }
     }
 
-    return total;
+    println!("final {}", total * tribonaccis[consecutive_one_diffs]);
 }
 
 fn main() -> std::io::Result<()> {
@@ -51,12 +80,8 @@ fn main() -> std::io::Result<()> {
     lines.push(lines.iter().max().unwrap() + 3);
     lines.sort();
 
-    //for line in &lines {
-        //println!("{}", line);
-    //}
-
     part1(&lines);
-    println!("{}", part2(&lines, 1) + 1);
+    part2(&lines);
 
     Ok(())
 }
