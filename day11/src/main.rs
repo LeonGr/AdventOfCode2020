@@ -1,4 +1,4 @@
-use std::{collections::HashSet, io::BufRead};
+use std::io::BufRead;
 
 fn read_input_lines() -> std::io::Result<Vec<String>> {
     let input_file = std::fs::File::open("input")?;
@@ -10,43 +10,144 @@ fn read_input_lines() -> std::io::Result<Vec<String>> {
         .collect())
 }
 
-fn print_grid(grid: &Vec<Vec<char>>) {
-    for row in grid {
-        println!("{:?}", row);
+fn to_char_with_padding(input: &Vec<String>) -> Vec<Vec<char>> {
+    let mut grid: Vec<Vec<char>> = vec![];
+
+    grid.push(vec!['.'; input[0].len() + 2]);
+    for line in input {
+        grid.push(format!(".{}.", line).chars().collect())
     }
+    grid.push(vec!['.'; input[0].len() + 2]);
+
+    grid
 }
 
-fn get_occupied_adjactent(grid: &Vec<Vec<char>>, row: usize, col: usize) -> usize {
+fn count_occupied(grid: &Vec<Vec<char>>) -> usize {
+    grid.iter()
+        .map(|row| row.iter().collect::<String>().matches("#").count())
+        .sum()
+}
 
-    return 0;
+fn get_occupied_adjactent(grid: &Vec<Vec<char>>, row: i32, col: i32) -> usize {
+    let mut total = 0;
+
+    for dr in -1..=1 {
+        for dc in -1..=1 {
+            if dr == 0 && dc == 0 {
+                continue;
+            }
+
+            if grid[(row + dr) as usize][(col + dc) as usize] == '#' {
+                total += 1;
+            }
+        }
+    }
+
+    total
 }
 
 fn part1(lines: &Vec<String>) {
-    let mut grid: Vec<Vec<char>> = vec![];
+    let mut grid = to_char_with_padding(lines);
+    let mut changed;
 
-    grid.push(vec!['.'; lines[0].len()+2]);
+    loop {
+        changed = false;
 
-    for line in lines {
-        let mut padded_line: String = ".".to_owned();
-        padded_line.push_str(line);
-        padded_line.push_str(".");
-        grid.push({
-            padded_line
-                .chars()
-                .collect::<Vec<char>>()
-        })
+        let mut copy = grid.clone();
+
+        for i in 1..copy.len() - 1 {
+            let row = &mut copy[i];
+
+            for j in 1..row.len() - 1 {
+                if row[j] == 'L' && get_occupied_adjactent(&grid, i as i32, j as i32) == 0 {
+                    row[j] = '#';
+                    changed = true;
+                } else if row[j] == '#' && get_occupied_adjactent(&grid, i as i32, j as i32) >= 4 {
+                    row[j] = 'L';
+                    changed = true;
+                }
+            }
+        }
+
+        grid = copy;
+
+        if !changed {
+            break;
+        }
     }
 
-    grid.push(vec!['.'; lines[0].len()+2]);
+    println!("part 1: occupied {}", count_occupied(&grid));
+}
 
-    print_grid(&grid);
+fn get_occupied_visible(grid: &Vec<Vec<char>>, row: i32, col: i32) -> usize {
+    let mut total = 0;
 
-    for i in 1..grid.len()-2 {
-        
+    for dr in -1..=1 {
+        for dc in -1..=1 {
+            if dr == 0 && dc == 0 {
+                continue;
+            }
+
+            let mut distance = 1;
+
+            loop {
+                let coordinate_x = row + dr * distance;
+                let coordinate_y = col + dc * distance;
+
+                if coordinate_x < 0
+                    || coordinate_y < 0
+                    || coordinate_x >= grid.len() as i32
+                    || coordinate_y >= grid[0].len() as i32
+                {
+                    break;
+                }
+
+                match grid[coordinate_x as usize][coordinate_y as usize] {
+                    '#' => {
+                        total += 1;
+                        break;
+                    }
+                    'L' => break,
+                    _ => distance += 1,
+                }
+            }
+        }
     }
+
+    total
 }
 
 fn part2(lines: &Vec<String>) {
+    let mut grid = to_char_with_padding(lines);
+    let mut changed;
+
+    loop {
+        changed = false;
+
+        let mut copy = grid.clone();
+
+        for i in 1..copy.len() - 1 {
+            let row = &mut copy[i];
+
+            for j in 1..row.len() - 1 {
+                if row[j] == 'L' && get_occupied_visible(&grid, i as i32, j as i32) == 0 {
+                    row[j] = '#';
+                    changed = true;
+                } else if row[j] == '#' && get_occupied_visible(&grid, i as i32, j as i32) >= 5 {
+                    row[j] = 'L';
+                    changed = true;
+                }
+            }
+        }
+
+        grid = copy;
+
+        if !changed {
+            break;
+        }
+    }
+
+    println!("part 2: occupied {}", count_occupied(&grid));
 }
 
 fn main() -> std::io::Result<()> {
