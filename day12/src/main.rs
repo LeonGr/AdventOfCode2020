@@ -19,9 +19,7 @@ fn part1(lines: &Vec<String>) {
     for line in lines {
         let mut chars = line.chars();
         let action = chars.nth(0).unwrap();
-        let value = chars.skip(0).collect::<String>().parse::<i32>().unwrap();
-
-        println!("{:?} {:?}", action, value);
+        let mut value = chars.skip(0).collect::<String>().parse::<i32>().unwrap();
 
         match action {
             'F' => position = position + value * &direction,
@@ -29,30 +27,23 @@ fn part1(lines: &Vec<String>) {
             'E' => position = position + Array::from(vec![value, 0]),
             'S' => position = position + Array::from(vec![0, -value]),
             'W' => position = position + Array::from(vec![-value, 0]),
-            'R' => {
-                //println!("{:?}", value as f64);
-                let angle = (-value as f64).to_radians();
-                let ca = angle.cos() as i32;
-                let sa = angle.sin() as i32;
-                let matrix = arr2(&[[ca, -sa], [sa, ca]]);
-                direction = matrix.dot(&direction);
-                //println!("{:?}", direction);
-            }
-            'L' => {
+            'L' | 'R' => {
+                if action == 'R' {
+                    value *= -1;
+                }
                 let angle = (value as f64).to_radians();
                 let ca = angle.cos() as i32;
                 let sa = angle.sin() as i32;
-                let matrix = arr2(&[[ca, -sa], [sa, ca]]);
-                direction = matrix.dot(&direction);
+                let rotation_matrix = arr2(&[[ca, -sa], [sa, ca]]);
+                direction = rotation_matrix.dot(&direction);
             }
             _ => unreachable!(),
         }
-
-        println!("pos {} dir {}", position, direction);
-        let x = position.get(0).unwrap();
-        let y = position.get(1).unwrap();
-        println!("{}", x.abs() + y.abs());
     }
+
+    let x = position.get(0).unwrap();
+    let y = position.get(1).unwrap();
+    println!("{}", x.abs() + y.abs());
 }
 
 fn part2(lines: &Vec<String>) {
