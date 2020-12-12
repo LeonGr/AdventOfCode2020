@@ -1,4 +1,5 @@
 use std::io::BufRead;
+#[macro_use] extern crate itertools;
 
 fn read_input_lines() -> std::io::Result<Vec<String>> {
     let input_file = std::fs::File::open("input")?;
@@ -29,21 +30,12 @@ fn count_occupied(grid: &Vec<Vec<char>>) -> usize {
 }
 
 fn get_occupied_adjactent(grid: &Vec<Vec<char>>, row: i32, col: i32) -> usize {
-    let mut total = 0;
-
-    for dr in -1..=1 {
-        for dc in -1..=1 {
-            if dr == 0 && dc == 0 {
-                continue;
-            }
-
-            if grid[(row + dr) as usize][(col + dc) as usize] == '#' {
-                total += 1;
-            }
-        }
-    }
-
-    total
+    iproduct!(-1..=1, -1..=1)
+        .filter(|t| t != &(0, 0))
+        .filter(|(dr, dc)| {
+            grid[(row + dr) as usize][(col + dc) as usize] == '#'
+        })
+        .count()
 }
 
 fn part1(lines: &Vec<String>) {
@@ -80,14 +72,9 @@ fn part1(lines: &Vec<String>) {
 }
 
 fn get_occupied_visible(grid: &Vec<Vec<char>>, row: i32, col: i32) -> usize {
-    let mut total = 0;
-
-    for dr in -1..=1 {
-        for dc in -1..=1 {
-            if dr == 0 && dc == 0 {
-                continue;
-            }
-
+    iproduct!(-1..=1, -1..=1)
+        .filter(|t| t != &(0, 0))
+        .filter(|(dr, dc)| {
             let mut distance = 1;
 
             loop {
@@ -99,22 +86,17 @@ fn get_occupied_visible(grid: &Vec<Vec<char>>, row: i32, col: i32) -> usize {
                     || coordinate_x >= grid.len() as i32
                     || coordinate_y >= grid[0].len() as i32
                 {
-                    break;
+                    return false;
                 }
 
                 match grid[coordinate_x as usize][coordinate_y as usize] {
-                    '#' => {
-                        total += 1;
-                        break;
-                    }
-                    'L' => break,
+                    '#' => return true,
+                    'L' => return false,
                     _ => distance += 1,
                 }
             }
-        }
-    }
-
-    total
+        })
+        .count()
 }
 
 fn part2(lines: &Vec<String>) {
