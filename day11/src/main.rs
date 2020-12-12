@@ -1,5 +1,6 @@
 use std::io::BufRead;
-#[macro_use] extern crate itertools;
+#[macro_use]
+extern crate itertools;
 
 fn read_input_lines() -> std::io::Result<Vec<String>> {
     let input_file = std::fs::File::open("input")?;
@@ -32,9 +33,7 @@ fn count_occupied(grid: &Vec<Vec<char>>) -> usize {
 fn get_occupied_adjactent(grid: &Vec<Vec<char>>, row: i32, col: i32) -> usize {
     iproduct!(-1..=1, -1..=1)
         .filter(|t| t != &(0, 0))
-        .filter(|(dr, dc)| {
-            grid[(row + dr) as usize][(col + dc) as usize] == '#'
-        })
+        .filter(|(dr, dc)| grid[(row + dr) as usize][(col + dc) as usize] == '#')
         .count()
 }
 
