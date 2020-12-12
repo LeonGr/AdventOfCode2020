@@ -22,12 +22,12 @@ navigatePart1 = rec (0, 0) (1, 0) -- call with starting position (0, 0), directi
         -- Otherwise, update current position or direction according to the first instruction (act, val)
         -- and recurse with the new values and the remaining instructions
         rec pos dir ((act, val):ins)
-          | act == 'F' = rec (vectorAdd pos (scalarMul val dir )) dir                    ins
+          | act == 'F' = rec (vectorAdd pos (scalarMul val dir))  dir                    ins
           | act == 'N' = rec (vectorAdd pos (0, val))             dir                    ins
           | act == 'E' = rec (vectorAdd pos (val, 0))             dir                    ins
           | act == 'S' = rec (vectorAdd pos (0, -val))            dir                    ins
           | act == 'W' = rec (vectorAdd pos (-val, 0))            dir                    ins
-          | act == 'L' = rec pos                                  (rotateVec val dir)    ins
+          | act == 'L' = rec pos                                  (rotateVec val    dir) ins
           | act == 'R' = rec pos                                  (rotateVec (-val) dir) ins
           | otherwise     = error "Unknown instruction"
 
@@ -43,7 +43,7 @@ navigatePart2 = rec (0, 0) (10, 1)
           | act == 'E' = rec pos                                 (vectorAdd dir (val, 0))  ins
           | act == 'S' = rec pos                                 (vectorAdd dir (0, -val)) ins
           | act == 'W' = rec pos                                 (vectorAdd dir (-val, 0)) ins
-          | act == 'L' = rec pos                                 (rotateVec val dir)       ins
+          | act == 'L' = rec pos                                 (rotateVec val    dir)    ins
           | act == 'R' = rec pos                                 (rotateVec (-val) dir)    ins
           | otherwise     = error "Unknown instruction"
 
