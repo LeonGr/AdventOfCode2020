@@ -27,6 +27,7 @@ fn part1(lines: &Vec<String>) {
     println!("{:?}", (earliest - departure) * bus_id_time);
 }
 
+// Source: https://rosettacode.org/wiki/Modular_inverse#Rust
 fn modular_inverse(a: i64, modulo: i64) -> i64 {
     let mut mn = (modulo, a);
     let mut xy = (0, 1);
@@ -48,8 +49,6 @@ fn part2(lines: &Vec<String>) {
             .split(",")
             .collect::<Vec<&str>>();
 
-    println!("{:?}", times_ids);
-
     let non_x: Vec<(i64, i64)> = times_ids
         .iter()
         .enumerate()
@@ -58,27 +57,19 @@ fn part2(lines: &Vec<String>) {
         .map(|(i, x)| (i as i64, x.parse::<i64>().unwrap()))
         .collect();
 
-    println!("non_x {:?}", non_x);
-
     let n = non_x
         .iter()
         .fold(1, |acc, (_, x)| acc * x);
-
-    println!("n {:?}", n);
 
     let m: Vec<i64> = non_x
         .iter()
         .map(|(_, x)| n / x)
         .collect();
 
-    println!("m {:?}", m);
-
     let a: Vec<i64> = non_x
         .iter()
         .map(|(i, x)| (x - i) % x)
         .collect();
-
-    println!("a {:?}", a);
 
     let c: Vec<i64> = m
         .iter()
@@ -86,12 +77,8 @@ fn part2(lines: &Vec<String>) {
         .map(|(i, &x)| x * modular_inverse(x as i64, non_x[i].1 as i64))
         .collect();
 
-    println!("c {:?}", c);
-
-    let mut t = 0;
-    for i in 0..non_x.len() {
-        t += a[i] * c[i];
-    }
+    let t = (0..non_x.len())
+        .fold(0, |acc, i| acc + a[i] * c[i]);
 
     println!("t {}", t % n);
 }
@@ -101,8 +88,6 @@ fn main() -> std::io::Result<()> {
 
     part1(&lines);
     part2(&lines);
-
-    //println!("{}", modular_inverse(5, 13));
 
     Ok(())
 }
