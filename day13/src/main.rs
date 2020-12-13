@@ -62,13 +62,13 @@ fn part2(lines: &Vec<String>) {
 
     let n = non_x
         .iter()
-        .fold(1, |acc, (i, x)| acc * x);
+        .fold(1, |acc, (_, x)| acc * x);
 
     println!("n {:?}", n);
 
     let m: Vec<i64> = non_x
         .iter()
-        .map(|(i, x)| n / x)
+        .map(|(_, x)| n / x)
         .collect();
 
     println!("m {:?}", m);
