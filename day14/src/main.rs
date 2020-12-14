@@ -12,11 +12,11 @@ fn read_input_lines() -> std::io::Result<Vec<String>> {
 
 fn apply_mask(mask: &str, value: u64) -> u64 {
     let chars = mask.chars().collect::<Vec<char>>();
-    let mask_len = 36;
+    let mask_len = chars.len();
     let mut ones_mask: u64 = 0;
     let mut zeroes_mask: u64 = 0;
 
-    for i in 0..chars.len() {
+    for i in 0..mask_len {
         match chars[mask_len - i - 1] {
             'X' => continue,
             '1' => ones_mask += (2u64).pow(i as u32),
@@ -25,13 +25,7 @@ fn apply_mask(mask: &str, value: u64) -> u64 {
         }
     }
 
-    let mut output = value;
-
-    output |= ones_mask;
-    output &= !zeroes_mask;
-
-
-    output
+    (value | ones_mask) & !zeroes_mask
 }
 
 fn part1(lines: &Vec<String>) {
@@ -47,6 +41,8 @@ fn main() -> std::io::Result<()> {
     part2(&lines);
 
     println!("{}", apply_mask("XXXXXXXXXXXXXXXXXXXXXXXXXXXXX1XXXX0X", 11));
+    println!("{}", apply_mask("XXXXXXXXXXXXXXXXXXXXXXXXXXXXX1XXXX0X", 101));
+    println!("{}", apply_mask("XXXXXXXXXXXXXXXXXXXXXXXXXXXXX1XXXX0X", 0));
 
     Ok(())
 }
