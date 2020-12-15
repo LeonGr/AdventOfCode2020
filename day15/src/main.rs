@@ -1,46 +1,53 @@
 use std::collections::{HashMap, HashSet};
 
-fn part1(input: &Vec<u32>) {
+#[derive(Debug)]
+struct Seen {
+    first: u32,
+    last: u32,
+}
+
+fn run(input: &[u32], max_turn: u32) {
     let mut turn = 1;
 
-    let mut tracker: HashMap<u32, u32> = HashMap::new();
-    let mut not_first: HashSet<u32> = HashSet::new();
+    let mut tracker: HashMap<u32, Seen> = HashMap::new();
 
     for i in 0..input.len() {
-        tracker.insert(input[i], turn);
+        tracker.insert(input[i], Seen { first: turn, last: turn });
         turn += 1;
     }
 
-    let mut last: u32 = input.last().unwrap().to_owned();
+    let mut last_spoken = input.last().unwrap().to_owned();
 
-    while turn <= 20 {
-        match tracker.get(&last) {
-            Some(spoken_turn) => {
-                if not_first.contains(&last) {
+    while turn <= max_turn {
+        match tracker.get(&last_spoken) {
+            Some(last_seen_info) => {
+                let (first, last) = (last_seen_info.first, last_seen_info.last);
 
+                tracker.insert(last_spoken, Seen {first, last: turn - 1});
+
+                if turn - 1 == last {
+                    last_spoken = 0;
                 } else {
-                    last = 0;
-                    not_first.insert(last);
+                    last_spoken = turn - 1 - last;
                 }
             }
             None => {
-
+                tracker.insert(last_spoken, Seen { first: turn - 1, last: turn - 1 });
+                last_spoken = 0;
             }
         }
 
         turn += 1;
     }
-}
 
-fn part2(input: &Vec<u32>) {
+    println!("last_spoken {}", last_spoken);
 }
 
 fn main() -> std::io::Result<()> {
-    //let input = vec![18,11,9,0,5,1];
-    let input = vec![0,3,6];
+    let input = [18,11,9,0,5,1];
 
-    part1(&input);
-    part2(&input);
+    run(&input, 2020u32);
+    run(&input, 30000000u32);
 
     Ok(())
 }
