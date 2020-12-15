@@ -35,13 +35,10 @@ fn part1(lines: &Vec<String>) {
     for line in lines {
         if line.starts_with("mask") {
             current_mask = line.split(" = ").collect::<Vec<&str>>().pop().unwrap();
-            //println!("{}", current_mask);
         } else {
-            //println!("{:?}", line.split("mem[").split("] = ").collect::<Vec<&str>>());
             let values = line.get(4..).unwrap().split("] = ")
                 .map(|x| x.parse::<u64>().unwrap())
                 .collect::<Vec<u64>>();
-            //println!("{:?}", values);
 
             memory.insert(values[0], apply_mask(current_mask, values[1]));
         }
@@ -50,52 +47,72 @@ fn part1(lines: &Vec<String>) {
     println!("{:?}", memory.values().into_iter().sum::<u64>());
 }
 
+fn apply_mask2(mask: &str, address: u64) -> String {
+    let binary = format!("{:b}", address);
+    let zeroes = vec!['0'; 36 - binary.len()].iter().collect::<String>();
+    let with_leading_zeroes = format!("{}{}", zeroes, binary).chars().collect::<Vec<char>>();
+    let mask_chars = mask.chars().collect::<Vec<char>>();
+
+    let mut output: Vec<char> = vec![];
+
+    for i in 0..36 {
+        if mask_chars[i] == '0' {
+            output.push(with_leading_zeroes[i]);
+        } else {
+            output.push(mask_chars[i]);
+        }
+    }
+
+    output.iter().collect::<String>()
+}
+
+fn with_x_to_all(floating: &str) -> Vec<String> {
+    let mut current: Vec<String> = vec!["".to_string()];
+
+    for bit in floating.chars().rev() {
+        if bit == 'X' {
+            let mut copy = current.clone();
+            for i in 0..current.len() {
+                current[i] = format!("{}1", current[i]);
+                copy[i] = format!("{}0", copy[i]);
+            }
+            current.append(&mut copy);
+        }
+        else {
+            for i in 0..current.len() {
+                current[i] = format!("{}{}", current[i], bit);
+            }
+        }
+    }
+
+    for i in 0..current.len() {
+        current[i] = current[i].chars().rev().collect::<String>();
+    }
+
+    current
+}
+
 fn part2(lines: &Vec<String>) {
     let mut memory: HashMap<u64, u64> = HashMap::new();
 
-    let mut current_masks: Vec<String> = vec!["".to_string()];
+    let mut current_mask: &str = "";
+
     for line in lines {
-        println!("");
         if line.starts_with("mask") {
-            current_masks = vec!["".to_string()];
-
-            let mask = line.split(" = ").collect::<Vec<&str>>().pop().unwrap().chars();
-
-            for bit in mask.rev() {
-                if bit == 'X' {
-                    let mut copy = current_masks.clone();
-                    for i in 0..current_masks.len() {
-                        current_masks[i] = format!("{}1", current_masks[i]);
-                        copy[i] = format!("{}0", copy[i]);
-                    }
-                    current_masks.append(&mut copy);
-                }
-                else {
-                    for i in 0..current_masks.len() {
-                        current_masks[i] = format!("{}{}", current_masks[i], bit);
-                    }
-                }
-            }
-
-            for i in 0..current_masks.len() {
-                current_masks[i] = current_masks[i].chars().rev().collect::<String>();
-            }
-
-            println!("{:?}", current_masks);
+            current_mask = line.split(" = ").collect::<Vec<&str>>().pop().unwrap();
         } else {
-            //println!("{:?}", line.split("mem[").split("] = ").collect::<Vec<&str>>());
             let values = line.get(4..).unwrap().split("] = ")
                 .map(|x| x.parse::<u64>().unwrap())
                 .collect::<Vec<u64>>();
-            println!("{:?}", values);
 
-            for mask in &current_masks {
-                let decoded_address = apply_mask(mask.as_str(), values[0]);
-                println!("{} -> {}", values[0], decoded_address);
-                memory.insert(decoded_address, values[1]);
+            let with_x = apply_mask2(current_mask, values[0]);
+            let all_addresses = with_x_to_all(with_x.as_str());
+
+            for address in all_addresses {
+                let address_decimal = u64::from_str_radix(address.as_str(), 2).unwrap();
+                memory.insert(address_decimal, values[1]);
             }
 
-            //memory.insert(values[0], apply_mask(current_mask, values[1]));
         }
     }
 
@@ -107,10 +124,6 @@ fn main() -> std::io::Result<()> {
 
     part1(&lines);
     part2(&lines);
-
-    //println!("{}", apply_mask("XXXXXXXXXXXXXXXXXXXXXXXXXXXXX1XXXX0X", 11));
-    //println!("{}", apply_mask("XXXXXXXXXXXXXXXXXXXXXXXXXXXXX1XXXX0X", 101));
-    //println!("{}", apply_mask("XXXXXXXXXXXXXXXXXXXXXXXXXXXXX1XXXX0X", 0));
 
     Ok(())
 }
