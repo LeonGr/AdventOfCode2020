@@ -7,9 +7,9 @@ fn run(input: &[i32], max_turn: i32) {
         tracker[input[i as usize] as usize] = i + 1;
     }
 
-    let mut last_spoken: usize = input[(len-1) as usize] as usize;
+    let mut last_spoken: usize = input[(len - 1) as usize] as usize;
 
-    for turn in (len+1)..=max_turn {
+    for turn in (len + 1)..=max_turn {
         let last_seen_info = tracker[last_spoken];
 
         if last_seen_info == 0 {
