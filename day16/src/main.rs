@@ -47,8 +47,7 @@ fn parse_input(lines: &Vec<String>) -> Parsed {
                 })
                 .collect::<Vec<ValidRange>>();
 
-            fields.insert(key.to_string(), (ranges[0].to_owned(), ranges[1].to_owned()),
-            );
+            fields.insert(key.to_string(), (ranges[0].to_owned(), ranges[1].to_owned()));
         } else if current_stage == 1 {
             values = parse_fields_string(line);
         } else if current_stage == 2 {
