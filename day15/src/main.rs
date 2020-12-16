@@ -12,19 +12,14 @@ fn run(input: &[i32], max_turn: i32) {
     for turn in (len + 1)..=max_turn {
         let last_seen_info = tracker[last_spoken];
 
-        if last_seen_info == 0 {
-            tracker[last_spoken] = turn - 1;
-            last_spoken = 0;
-        } else {
-            tracker[last_spoken] = turn - 1;
+        tracker[last_spoken] = turn - 1;
 
-            last_spoken = {
-                if turn - 1 == last_seen_info {
-                    0
-                } else {
-                    (turn - 1 - last_seen_info) as usize
-                }
-            };
+        last_spoken = {
+            if last_seen_info == 0 || turn - 1 == last_seen_info {
+                0
+            } else {
+                (turn - 1 - last_seen_info) as usize
+            }
         }
     }
 
