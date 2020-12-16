@@ -1,6 +1,6 @@
 main :: IO ()
 main = do
-    ls <- fmap lines (readFile "input") -- Read strings from file to list
+    ls <- lines <$> readFile "input" -- Read strings from file to list
     print $ navigatePart1 $ parseLines ls
     print $ navigatePart2 $ parseLines ls
 
