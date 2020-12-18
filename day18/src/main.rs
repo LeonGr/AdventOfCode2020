@@ -1,6 +1,4 @@
 use std::{ io::BufRead, collections::HashMap };
-//#[macro_use]
-//extern crate itertools;
 
 fn read_input_lines() -> std::io::Result<Vec<String>> {
     let input_file = std::fs::File::open("input")?;
