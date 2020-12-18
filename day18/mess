@@ -1,0 +1,61 @@
+    while stripped.contains("+") {
+        let length = stripped.len();
+
+        let first_plus_index = match stripped.find('+') {
+            Some(index) => index,
+            None => return parse_left_to_right(&stripped),
+        };
+
+        println!("first_plus_index: {}", first_plus_index);
+
+        let mut new_expression: String = String::new();
+
+        let chars = stripped.chars().collect::<Vec<char>>();
+        match chars[first_plus_index - 1] {
+            ')' => {
+                println!("first part is in brackets");
+                let first_part = flip(stripped[..first_plus_index].to_string());
+                println!("first_part {}", first_part);
+                let index_match_paren = find_index_matching_paren(&first_part);
+                new_expression += &stripped[..(first_plus_index - index_match_paren)];
+                new_expression += "(";
+                new_expression += &stripped[(first_plus_index - index_match_paren - 1)..first_plus_index];
+                new_expression += "#";
+            }
+            n => {
+                if first_plus_index > 2 {
+                    new_expression += &stripped[..=(first_plus_index - 2)];
+                }
+                new_expression += "(";
+                new_expression += n.to_string().as_str();
+                new_expression += "#";
+            },
+        }
+
+        match chars[first_plus_index + 1] {
+            '(' => {
+                println!("second part is in brackets");
+                let second_part = &stripped[(first_plus_index + 1)..].to_string();
+                println!("second part {}", second_part);
+                let index_match_paren = find_index_matching_paren(&second_part);
+                println!("index_match_paren {}", index_match_paren);
+                new_expression += &stripped[first_plus_index + 1..=first_plus_index + 1 + index_match_paren];
+                new_expression += ")";
+                new_expression += &stripped[first_plus_index + 2 + index_match_paren..];
+            }
+            n => {
+                new_expression += n.to_string().as_str();
+                new_expression += ")";
+                if first_plus_index + 2 < length {
+                    new_expression += &stripped[first_plus_index + 2..];
+                }
+            }
+        }
+
+        println!("new expression {}", new_expression);
+        stripped = new_expression;
+    }
+
+    println!("reached end while");
+
+
