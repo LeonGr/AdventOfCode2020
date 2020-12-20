@@ -282,41 +282,35 @@ fn finish_puzzle(tiles: &Vec<Tile>) -> Vec<Vec<Tile>> {
                 continue;
             }
 
-            if c == 0 {
-                let rotated = rotate(&puzzle[r-1][0], 2);
-                for tile in tiles_left.clone() {
-                    if rotated.id == tile.id {
-                        continue;
-                    }
-                    match check_fit(&rotated, &tile) {
-                        Some(transform) => {
-                            let mut new = rotate(&tile, transform.0);
-                            if !transform.1 {
-                                new = flip(&new);
-                            }
-                            puzzle[r][c] = new;
-                        }
-                        None => continue,
-                    }
+            let rotated = {
+                if c == 0 {
+                    rotate(&puzzle[r-1][0], 2)
+                } else {
+                    rotate(&puzzle[r][c-1], 1)
                 }
-            }
-            else {
-                let rotated = rotate(&puzzle[r][c-1], 1);
-                for tile in tiles_left.clone() {
-                    if rotated.id == tile.id {
-                        continue;
-                    }
-                    match check_fit(&rotated, &tile) {
-                        Some(transform) => {
-                            let mut new = rotate(&tile, transform.0);
-                            if !transform.1 {
-                                new = flip(&new);
-                            }
-                            new = rotate(&new, 1);
-                            puzzle[r][c] = new;
+            };
+
+            for tile in tiles_left.clone() {
+                if rotated.id == tile.id {
+                    continue;
+                }
+                match check_fit(&rotated, &tile) {
+                    Some(transform) => {
+                        let mut new = rotate(&tile, transform.0);
+                        if !transform.1 {
+                            new = flip(&new);
                         }
-                        None => continue,
+                        if c != 0 {
+                            new = rotate(&new, 1);
+                        }
+                        puzzle[r][c] = new;
+                        tiles_left = tiles_left
+                            .iter()
+                            .filter(|t| t.id != tile.id)
+                            .map(|tile| tile.to_owned())
+                            .collect::<Vec<Tile>>();
                     }
+                    None => continue,
                 }
             }
         }
@@ -325,9 +319,148 @@ fn finish_puzzle(tiles: &Vec<Tile>) -> Vec<Vec<Tile>> {
     puzzle
 }
 
+fn create_monster_coordinates() -> Vec<(usize, usize)> {
+    let monster = r"                  # 
+#    ##    ##    ###
+ #  #  #  #  #  #   ";
+
+    println!("monster: \n{}", monster);
+    let mut monster_coordinates: Vec<(usize, usize)> = vec![];
+    let monster_lines = monster.split("\n").collect::<Vec<&str>>();
+    for i in 0..monster_lines.len() {
+        println!("{:?}", monster_lines[i]);
+        let line = monster_lines[i].chars().collect::<Vec<char>>();
+        for j in 0..line.len() {
+            if line[j] == '#' {
+                monster_coordinates.push((i, j));
+            }
+        }
+    }
+
+    monster_coordinates
+}
+
+fn find_sea_monsters(image: &Tile, monster_coordinates: &Vec<(usize, usize)>) -> Option<(u8, Tile)> {
+    println!("{:?}", monster_coordinates);
+
+    let mut pixels = image.pixels.clone();
+
+    let monster_length = 20;
+    let monster_height = 3;
+
+    let mut monsters_found = 0;
+
+    for r in 0..pixels.len() - monster_height {
+        for c in 0..pixels[0].len() - monster_length {
+            let mut monster_at_coordinate = true;
+            for (x, y) in monster_coordinates {
+                if pixels[r+x][c+y] != '#' && pixels[r+x][c+y] != 'O' {
+                    monster_at_coordinate = false;
+                }
+            }
+
+            if monster_at_coordinate {
+                for (x, y) in monster_coordinates {
+                    pixels[r+x][c+y] = 'O';
+                }
+                monsters_found += 1;
+            }
+        }
+    }
+
+    println!("found {} monsters", monsters_found);
+    if monsters_found > 0 {
+        Some((monsters_found, Tile { id: 2, pixels }))
+    } else {
+        None
+    }
+}
+
 fn part2(tiles: &Vec<Tile>) {
     let puzzle = finish_puzzle(tiles);
     println!("{:?}", puzzle);
+
+    let puzzle_size = (tiles.len() as f32).sqrt() as usize;
+    let piece_size = tiles[0].pixels.len();
+    let empty_tile = Tile { id: 0, pixels: vec![vec!['.'; piece_size]; piece_size] };
+    let mut no_border_puzzle = vec![vec![empty_tile.clone(); puzzle_size]; puzzle_size];
+
+    for r in 0..puzzle_size {
+        for c in 0..puzzle_size {
+            let piece = &puzzle[r][c];
+            let mut new_pixels: Vec<Vec<char>> = vec![];
+            for i in 1..piece.pixels.len() - 1 {
+                let relevant_pixels = &piece.pixels[i][1..piece_size - 1];
+                println!("relevant_pixels {:?}", relevant_pixels);
+                new_pixels.push(relevant_pixels.to_vec());
+            }
+
+            no_border_puzzle[r][c] = Tile { id: piece.id, pixels: new_pixels };
+        }
+    }
+
+    println!("{:?}", no_border_puzzle);
+
+    let mut puzzle_string = String::new();
+    for r in 0..puzzle_size {
+        for i in 0..piece_size - 2 {
+            for c in 0..puzzle_size {
+                puzzle_string += no_border_puzzle[r][c].pixels[i].iter().collect::<String>().as_str();
+            }
+            puzzle_string += "\n";
+        }
+    }
+
+    println!("{}", puzzle_string);
+
+    let mut current_pixels = vec![];
+
+    for line in puzzle_string.split("\n") {
+        current_pixels.push(line.chars().collect::<Vec<char>>());
+    }
+    current_pixels.pop();
+
+    let puzzle_tile = Tile { id: 1, pixels: current_pixels };
+    println!("{:?}", rotate(&flip(&puzzle_tile), 1));
+    let monster_coordinates = create_monster_coordinates();
+    find_sea_monsters(&rotate(&flip(&puzzle_tile), 1), &monster_coordinates);
+
+    for a in 0..=3 {
+        let rotated = rotate(&puzzle_tile, a);
+        match find_sea_monsters(&rotated, &monster_coordinates) {
+            Some((num, tile)) => {
+                println!("{} {:?}", num, tile);
+                let mut total_hash = 0;
+                for row in tile.pixels {
+                    for chr in row {
+                        if chr == '#' {
+                            total_hash += 1;
+                        }
+                    }
+                }
+                println!("roughness {}", total_hash);
+                break;
+            }
+            None => (),
+        }
+        let flipped = flip(&rotated);
+        match find_sea_monsters(&flipped, &monster_coordinates) {
+            Some((num, tile)) => {
+                println!("{} {:?}", num, tile);
+                let mut total_hash = 0;
+                for row in tile.pixels {
+                    for chr in row {
+                        if chr == '#' {
+                            total_hash += 1;
+                        }
+                    }
+                }
+                println!("roughness {}", total_hash);
+                break;
+            }
+            None => (),
+        }
+    }
 }
 
 fn main() -> std::io::Result<()> {
