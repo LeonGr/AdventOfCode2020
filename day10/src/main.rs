@@ -28,49 +28,19 @@ fn part1(lines: &Vec<u64>) {
     println!("multiplied: {}", diff_one * diff_three);
 }
 
-fn tribonacci(n: u64) -> u64 {
-    if n == 0 || n == 1 {
-        return 0;
-    } else if n == 2 {
-        return 1;
-    } else {
-        return tribonacci(n - 1) + tribonacci(n - 2) + tribonacci(n - 3);
-    }
-}
-
 fn part2(lines: &Vec<u64>) {
-    let mut total: u64 = 1;
-
-    let mut tribonaccis: Vec<u64> = vec![];
-
-    for i in 2..7 {
-        tribonaccis.push(tribonacci(i as u64));
-    }
-
-    let mut consecutive_one_diffs = 0;
-
+    let mut dp = vec![0 as u64; lines.len()];
+    dp[0] = 1;
     for i in 1..lines.len() {
-        let diff = lines[i] - lines[i - 1];
-
-        if diff == 1 {
-            consecutive_one_diffs += 1;
-        } else {
-            let options;
-
-            if diff == 3 && consecutive_one_diffs > 0 {
-                options = tribonaccis[consecutive_one_diffs];
-            } else if consecutive_one_diffs > 0 {
-                options = tribonaccis[consecutive_one_diffs] + tribonaccis[consecutive_one_diffs-1];
-            } else {
-                options = 1;
+        for j in (0..i).rev() {
+            if lines[i] - lines[j] > 3 {
+                break;
             }
-
-            total *= options;
-            consecutive_one_diffs = 0;
+            dp[i] += dp[j];
         }
     }
 
-    println!("final {}", total * tribonaccis[consecutive_one_diffs]);
+    println!("final {}", dp.last().unwrap());
 }
 
 fn main() -> std::io::Result<()> {
