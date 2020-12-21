@@ -328,7 +328,6 @@ fn create_monster_coordinates() -> Vec<(usize, usize)> {
     let mut monster_coordinates: Vec<(usize, usize)> = vec![];
     let monster_lines = monster.split("\n").collect::<Vec<&str>>();
     for i in 0..monster_lines.len() {
-        println!("{:?}", monster_lines[i]);
         let line = monster_lines[i].chars().collect::<Vec<char>>();
         for j in 0..line.len() {
             if line[j] == '#' {
@@ -341,8 +340,6 @@ fn create_monster_coordinates() -> Vec<(usize, usize)> {
 }
 
 fn find_sea_monsters(image: &Tile, monster_coordinates: &Vec<(usize, usize)>) -> Option<(u8, Tile)> {
-    println!("{:?}", monster_coordinates);
-
     let mut pixels = image.pixels.clone();
 
     let monster_length = 20;
@@ -391,7 +388,6 @@ fn part2(tiles: &Vec<Tile>) {
             let mut new_pixels: Vec<Vec<char>> = vec![];
             for i in 1..piece.pixels.len() - 1 {
                 let relevant_pixels = &piece.pixels[i][1..piece_size - 1];
-                println!("relevant_pixels {:?}", relevant_pixels);
                 new_pixels.push(relevant_pixels.to_vec());
             }
 
@@ -421,7 +417,6 @@ fn part2(tiles: &Vec<Tile>) {
     current_pixels.pop();
 
     let puzzle_tile = Tile { id: 1, pixels: current_pixels };
-    println!("{:?}", rotate(&flip(&puzzle_tile), 1));
     let monster_coordinates = create_monster_coordinates();
     find_sea_monsters(&rotate(&flip(&puzzle_tile), 1), &monster_coordinates);
 
@@ -468,7 +463,7 @@ fn main() -> std::io::Result<()> {
 
     let tiles = parse(&lines);
 
-    //part1(&tiles);
+    part1(&tiles);
     part2(&tiles);
 
     Ok(())
