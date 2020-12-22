@@ -1,4 +1,6 @@
 use std::{ io::BufRead, collections::{ HashSet, HashMap } };
+use std::collections::hash_map::DefaultHasher;
+use std::hash::Hasher;
 
 fn read_input_lines() -> std::io::Result<Vec<String>> {
     let input_file = std::fs::File::open("input")?;
@@ -44,7 +46,7 @@ fn calculate_score(cards: &Vec<u16>) -> u16 {
         .fold(0, |acc, (i, x)| acc + (i+1) as u16 * x)
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 enum Winner {
     Player1,
     Player2,
@@ -78,16 +80,28 @@ fn play_combat(cards_p1: &mut Vec<u16>, cards_p2: &mut Vec<u16>) -> Outcome {
 }
 
 fn part1(cards_p1: &mut Vec<u16>, cards_p2: &mut Vec<u16>) {
-    let winners_cards = play_combat(cards_p1, cards_p2).cards;
+    let outcome = play_combat(cards_p1, cards_p2);
+    let winners_cards = outcome.cards;
     let score = calculate_score(&winners_cards);
 
-    println!("score {}", score);
+    println!("{:?} won, score {}", outcome.winner, score);
 }
 
-fn play_recursive_combat(cards_p1: &mut Vec<u16>, cards_p2: &mut Vec<u16>, seen_games: &mut HashMap<String, Outcome>) -> Outcome {
-    let mut previous_rounds: HashSet<String> = HashSet::new();
+fn hashify(cards_p1: &Vec<u16>, cards_p2: &Vec<u16>) -> u64 {
+    let mut hasher = DefaultHasher::new();
+    for num in cards_p1 {
+        hasher.write_u16(*num);
+    }
+    for num in cards_p2 {
+        hasher.write_u16(*num);
+    }
+    hasher.finish()
+}
 
-    let initial_state = format!("{:?}{:?}", cards_p1, cards_p2).to_string();
+fn play_recursive_combat(cards_p1: &mut Vec<u16>, cards_p2: &mut Vec<u16>, seen_games: &mut HashMap<u64, Outcome>) -> Outcome {
+    let mut previous_rounds: HashSet<u64> = HashSet::new();
+
+    let initial_state = hashify(cards_p1, cards_p2);
     match seen_games.get(&initial_state) {
         Some(result) => {
             return result.clone()
@@ -96,7 +110,7 @@ fn play_recursive_combat(cards_p1: &mut Vec<u16>, cards_p2: &mut Vec<u16>, seen_
     };
 
     while !cards_p1.is_empty() && !cards_p2.is_empty() {
-        let state_string = format!("{:?}{:?}", cards_p1, cards_p2).to_string();
+        let state_string = hashify(cards_p1, cards_p2);
 
         match seen_games.get(&state_string) {
             Some(result) => {
@@ -114,22 +128,23 @@ fn play_recursive_combat(cards_p1: &mut Vec<u16>, cards_p2: &mut Vec<u16>, seen_
         let card1 = cards_p1.pop().expect("Both vecs cannot be empty");
         let card2 = cards_p2.pop().expect("Both vecs cannot be empty");
 
-        let winner: Winner;
-        if cards_p1.len() >= card1 as usize && cards_p2.len() >= card2 as usize {
-            let subgame_cards_p1: Vec<u16> = cards_p1[cards_p1.len() - card1 as usize..].to_vec();
-            let subgame_cards_p2: Vec<u16> = cards_p2[cards_p2.len() - card2 as usize..].to_vec();
-            let outcome = play_recursive_combat(&mut subgame_cards_p1.clone(), &mut subgame_cards_p2.clone(), seen_games);
-            seen_games.insert(state_string, outcome.clone());
-            winner = outcome.winner;
-        } else {
-            winner = {
+        let winner = {
+            let len1 = cards_p1.len();
+            let len2 = cards_p2.len();
+            if len1 >= card1 as usize && len2 >= card2 as usize {
+                let subgame_cards_p1: Vec<u16> = cards_p1[len1 - card1 as usize..].to_vec();
+                let subgame_cards_p2: Vec<u16> = cards_p2[len2 - card2 as usize..].to_vec();
+                let outcome = play_recursive_combat(&mut subgame_cards_p1.clone(), &mut subgame_cards_p2.clone(), seen_games);
+                seen_games.insert(state_string, outcome.clone());
+                outcome.winner
+            } else {
                 if card1 > card2 {
                     Winner::Player1
                 } else {
                     Winner::Player2
                 }
             }
-        }
+        };
 
         match winner {
             Winner::Player1 => {
@@ -155,11 +170,12 @@ fn play_recursive_combat(cards_p1: &mut Vec<u16>, cards_p2: &mut Vec<u16>, seen_
 }
 
 fn part2(cards_p1: &mut Vec<u16>, cards_p2: &mut Vec<u16>) {
-    let mut seen_games: HashMap<String, Outcome> = HashMap::new();
-    let winners_cards = play_recursive_combat(cards_p1, cards_p2, &mut seen_games).cards;
+    let mut seen_games: HashMap<u64, Outcome> = HashMap::new();
+    let outcome = play_recursive_combat(cards_p1, cards_p2, &mut seen_games);
+    let winners_cards = outcome.cards;
     let score = calculate_score(&winners_cards);
 
-    println!("score {}", score);
+    println!("{:?} won, score {}", outcome.winner, score);
 }
 
 fn main() -> std::io::Result<()> {
