@@ -1,4 +1,4 @@
-use std::{ io::BufRead, collections::{ HashMap, HashSet } };
+use std::{ io::BufRead, collections::HashMap };
 
 fn read_input_lines() -> std::io::Result<Vec<String>> {
     let input_file = std::fs::File::open("input")?;
@@ -91,8 +91,7 @@ fn part1(instructions: &Vec<Vec<String>>) -> HashMap<Tile, Color> {
     tiles
 }
 
-fn neighbours(coordinate: Tile) -> Vec<Tile> {
-    let (x, y, z) = coordinate;
+fn neighbours((x, y, z): Tile) -> Vec<Tile> {
     vec![
         (x+1 , y-1 , z   ),
         (x   , y-1 , z+1 ),
@@ -142,25 +141,37 @@ fn daily_flip(tiles: &mut HashMap<Tile, Color>) -> HashMap<Tile, Color> {
 fn part2(tiles: &mut HashMap<Tile, Color>) {
     let mut copy = tiles.clone();
 
+    let all_set = copy.clone();
+    for &coordinate in all_set.keys() {
+        for neighbour in neighbours(coordinate) {
+            copy.entry(neighbour).or_insert(Color::White);
+        }
+    }
+
     for _ in 0..100 {
         let all_set = copy.clone();
-
-        for &coordinate in all_set.keys() {
-            for neighbour in neighbours(coordinate) {
-                copy.entry(neighbour).or_insert(Color::White);
+        for (&coordinate, color) in all_set.iter() {
+            match color {
+                Color::Black => {
+                    for neighbour in neighbours(coordinate) {
+                        copy.entry(neighbour).or_insert(Color::White);
+                    }
+                }
+                Color::White => continue,
             }
         }
 
         copy = daily_flip(&mut copy);
     }
 
-    let mut total_black = 0;
-    for color in copy.values() {
-        match color {
-            Color::Black => total_black += 1,
-            Color::White => (),
-        }
-    }
+    let total_black = copy.values()
+        .filter(|color| {
+            match color {
+                Color::Black => true,
+                Color::White => false,
+            }
+        })
+        .count();
 
     println!("total {}", total_black);
 

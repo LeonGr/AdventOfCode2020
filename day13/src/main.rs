@@ -53,7 +53,7 @@ fn part2(lines: &Vec<String>) {
         .iter()
         .enumerate()
         .map(|(i, &x)| (i, x))
-        .filter(|(i, x)| x != &"x")
+        .filter(|(_, x)| x != &"x")
         .map(|(i, x)| (i as i64, x.parse::<i64>().unwrap()))
         .collect();
 

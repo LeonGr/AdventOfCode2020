@@ -37,7 +37,7 @@ fn add_padding(grid: &Vec<Vec<char>>) -> Vec<Vec<char>> {
     padded_grid
 }
 
-fn print_grid(grid: &Vec<Vec<char>>) {
+fn _print_grid(grid: &Vec<Vec<char>>) {
     for row in grid {
         println!("{:?}", row);
     }

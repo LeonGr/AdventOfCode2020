@@ -1,5 +1,5 @@
 use regex::Regex;
-use std::{collections::{HashMap, HashSet}, io::BufRead};
+use std::{collections::HashMap, io::BufRead};
 
 fn read_input_lines() -> std::io::Result<Vec<String>> {
     let input_file = std::fs::File::open("input")?;
@@ -40,7 +40,7 @@ fn build_rules_map(rules: &Vec<String>) -> HashMap<usize, String> {
     rules_map
 }
 
-fn build_regex(rules: &Vec<String>) -> Regex {
+fn _build_regex(rules: &Vec<String>) -> Regex {
     let number_regex = Regex::new(r"\d").unwrap();
 
     let mut rules_map: HashMap<usize, String> = HashMap::new();

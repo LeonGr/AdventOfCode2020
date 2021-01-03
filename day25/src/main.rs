@@ -1,15 +1,3 @@
-use std::{ io::BufRead, collections::HashMap };
-
-fn read_input_lines() -> std::io::Result<Vec<String>> {
-    let input_file = std::fs::File::open("input")?;
-    let file_reader = std::io::BufReader::new(input_file);
-
-    Ok(file_reader
-        .lines()
-        .filter_map(std::io::Result::ok)
-        .collect())
-}
-
 fn transform(value: u64, subject: u64, modulo: u64) -> u64 {
     value * subject % modulo
 }

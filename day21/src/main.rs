@@ -1,4 +1,4 @@
-use std::{io::BufRead, collections::{HashMap, HashSet}, iter::FromIterator};
+use std::{io::BufRead, collections::{HashMap, HashSet}};
 
 fn read_input_lines() -> std::io::Result<Vec<String>> {
     let input_file = std::fs::File::open("input")?;

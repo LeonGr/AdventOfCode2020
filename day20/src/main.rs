@@ -57,7 +57,7 @@ fn parse(lines: &Vec<String>) -> Vec<Tile> {
     tiles
 }
 
-fn check_for_duplicate_borders(tiles: &Vec<Tile>) {
+fn _check_for_duplicate_borders(tiles: &Vec<Tile>) {
     for tile in tiles {
         for a in 0..=3 {
             let rotated = rotate(tile, a);
@@ -181,7 +181,7 @@ fn part1(tiles: &Vec<Tile>) {
     for tile in tiles {
         match is_corner(tile, tiles) {
             Some(_) => {
-                println!("tile {} is a corner", tile.id);
+                //println!("tile {} is a corner", tile.id);
                 corner_ids.push(tile.id);
             }
             None => (),
@@ -226,7 +226,7 @@ fn finish_puzzle(tiles: &Vec<Tile>) -> Vec<Vec<Tile>> {
             if !rotation_top_unfittable.contains(&a) {
                 let rotated = rotate(&initial_corner, a);
                 match check_fit(&rotated, tile) {
-                    Some(transform) => {
+                    Some(_) => {
                         initial_edge = tile.to_owned();
                     }
                     None => continue,
@@ -375,7 +375,7 @@ fn find_sea_monsters(image: &Tile, monster_coordinates: &Vec<(usize, usize)>) ->
 
 fn part2(tiles: &Vec<Tile>) {
     let puzzle = finish_puzzle(tiles);
-    println!("{:?}", puzzle);
+    //println!("{:?}", puzzle);
 
     let puzzle_size = (tiles.len() as f32).sqrt() as usize;
     let piece_size = tiles[0].pixels.len();
@@ -395,7 +395,7 @@ fn part2(tiles: &Vec<Tile>) {
         }
     }
 
-    println!("{:?}", no_border_puzzle);
+    //println!("{:?}", no_border_puzzle);
 
     let mut puzzle_string = String::new();
     for r in 0..puzzle_size {
@@ -407,7 +407,7 @@ fn part2(tiles: &Vec<Tile>) {
         }
     }
 
-    println!("{}", puzzle_string);
+    //println!("{}", puzzle_string);
 
     let mut current_pixels = vec![];
 
@@ -424,7 +424,7 @@ fn part2(tiles: &Vec<Tile>) {
         let rotated = rotate(&puzzle_tile, a);
         match find_sea_monsters(&rotated, &monster_coordinates) {
             Some((num, tile)) => {
-                println!("{} {:?}", num, tile);
+                //println!("{} {:?}", num, tile);
                 let mut total_hash = 0;
                 for row in tile.pixels {
                     for chr in row {
@@ -441,7 +441,7 @@ fn part2(tiles: &Vec<Tile>) {
         let flipped = flip(&rotated);
         match find_sea_monsters(&flipped, &monster_coordinates) {
             Some((num, tile)) => {
-                println!("{} {:?}", num, tile);
+                //println!("{} {:?}", num, tile);
                 let mut total_hash = 0;
                 for row in tile.pixels {
                     for chr in row {

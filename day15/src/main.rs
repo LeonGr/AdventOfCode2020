@@ -10,17 +10,19 @@ fn run(input: &[i32], max_turn: i32) {
     let mut last_spoken: usize = input[(len - 1) as usize] as usize;
 
     for turn in (len + 1)..=max_turn {
-        let last_seen_info = tracker[last_spoken];
 
-        tracker[last_spoken] = turn - 1;
-
-        last_spoken = {
+        let new_last_spoken = {
+            let last_seen_info = tracker[last_spoken];
             if last_seen_info == 0 || turn - 1 == last_seen_info {
                 0
             } else {
-                (turn - 1 - last_seen_info) as usize
+                (turn - (1 + last_seen_info)) as usize
             }
-        }
+        };
+
+        tracker[last_spoken] = turn - 1;
+
+        last_spoken = new_last_spoken;
     }
 
     println!("last_spoken {}", last_spoken);

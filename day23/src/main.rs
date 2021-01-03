@@ -1,12 +1,9 @@
-use std::collections::VecDeque;
-
 fn find(input: &Vec<u32>, target: u32) -> usize {
     input.iter().position(|&x| x == target).unwrap()
 }
 
 fn part1(input: &Vec<u32>) {
     let mut copy = input.clone();
-    let len = input.len();
     let min = *copy.iter().min().unwrap();
     let max = *copy.iter().max().unwrap();
 
@@ -14,26 +11,16 @@ fn part1(input: &Vec<u32>) {
 
     for _ in 0..100 {
         current_cup_index = current_cup_index % copy.len();
-        let mut current_cup = copy[current_cup_index];
-        //println!("current_cup {:?}", current_cup);
-        //println!("order {:?}", copy);
+        let current_cup = copy[current_cup_index];
 
         let mut three_cups: Vec<u32> = vec![];
-        //let index = (current_cup_index + 1) % len;
         for _ in 1..=3 {
             let index = (find(&copy, current_cup) + 1) % copy.len();
-            //println!("copy {:?}", copy);
-            //println!("len {:?}", copy.len());
-            //println!("index {}", index);
             three_cups.push(copy.remove(index));
         }
 
-        //println!("pick up {:?}", three_cups);
-        //println!("copy {:?}", copy);
-
         let mut destination_cup = current_cup - 1;
         loop {
-            //println!("picking destination_cup {}", destination_cup);
             if three_cups.contains(&destination_cup) {
                 destination_cup -= 1;
             } else if destination_cup < min {
@@ -43,18 +30,13 @@ fn part1(input: &Vec<u32>) {
             }
         }
 
-        //println!("destination_cup {:?}", destination_cup);
-
         let index_destination_cup = find(&copy, destination_cup);
         for (i, &cup) in three_cups.iter().enumerate() {
             copy.insert(index_destination_cup + i + 1, cup);
         }
 
         current_cup_index = find(&copy, current_cup) + 1;
-        //println!("");
     }
-
-    println!("copy {:?}", copy);
 
     let mut output = String::new();
     let index_1 = find(&copy, 1);
@@ -71,10 +53,8 @@ fn find_usize(input: &Vec<usize>, target: usize) -> usize {
 }
 
 fn part2(input: &Vec<usize>) {
-    let mut copy = input.clone();
-
-    let min = *copy.iter().min().unwrap();
-    let max = *copy.iter().max().unwrap();
+    let min = *input.iter().min().unwrap();
+    let max = *input.iter().max().unwrap();
 
     let mut next = vec![0; input.len()+1];
     for i in 0..input.len()-1 {
@@ -84,8 +64,12 @@ fn part2(input: &Vec<usize>) {
 
     let mut current_cup = input[0];
 
-    for i in 0..10_000_000 {
-        let mut three_cups: Vec<usize> = vec![next[current_cup], next[next[current_cup]], next[next[next[current_cup]]]];
+    let mut three_cups: Vec<usize> = vec![0; 3];
+
+    for _ in 0..10_000_000 {
+        three_cups[0] = next[current_cup];
+        three_cups[1] = next[three_cups[0]];
+        three_cups[2] = next[three_cups[1]];
         next[current_cup] = next[three_cups[2]];
 
         let mut destination_cup = current_cup - 1;
@@ -104,19 +88,19 @@ fn part2(input: &Vec<usize>) {
         next[three_cups[0]] = three_cups[1];
         next[three_cups[1]] = three_cups[2];
 
-        current_cup = next[current_cup as usize];
+        current_cup = next[current_cup];
     }
 
-    let mut copy = vec![0; input.len()];
+    let mut input = vec![0; input.len()];
     for i in 0..input.len() {
-        current_cup = next[current_cup as usize];
-        copy[i] = current_cup;
+        current_cup = next[current_cup];
+        input[i] = current_cup;
     }
 
 
-    let index_1 = find_usize(&copy, 1);
-    let add_1 = copy[index_1 + 1] as u64;
-    let add_2 = copy[index_1 + 2] as u64;
+    let index_1 = find_usize(&input, 1);
+    let add_1 = input[index_1 + 1] as u64;
+    let add_2 = input[index_1 + 2] as u64;
     let output = add_1 * add_2;
 
     println!("output {}", output);
@@ -124,9 +108,8 @@ fn part2(input: &Vec<usize>) {
 
 fn main() {
     let input: Vec<u32> = "487912365".chars().map(|x| x.to_digit(10).unwrap() as u32).collect();
-    //let input: Vec<u32> = "389125467".chars().map(|x| x.to_digit(10).unwrap() as u32).collect();
 
-    //part1(&input);
+    part1(&input);
 
     let mut part2_input = vec![];
     for i in &input {
